@@ -136,7 +136,6 @@ readPackageConfig file = do
       _ -> ": " ++ show err
 
 type Dependency = String
-type GhcOption = String
 
 data Package = Package {
   packageName :: String
@@ -304,15 +303,17 @@ toExecutables globalSourceDirs globalDependencies globalDefaultExtensions global
   where
     toExecutable (name, ExecutableSection{..}) = do
       modules <- maybe (filterMain . concat <$> mapM getModules sourceDirs) (return . fromList) executableSectionOtherModules
-      return $ Executable name executableSectionMain sourceDirs modules dependencies defaultExtensions ghcOptions
+      return $ Executable name mainSrcFile sourceDirs modules dependencies defaultExtensions ghcOptions
       where
         dependencies = filter (not . null) [globalDependencies, fromMaybeList executableSectionDependencies]
         sourceDirs = globalSourceDirs ++ fromMaybeList executableSectionSourceDirs
         defaultExtensions = globalDefaultExtensions ++ fromMaybeList executableSectionDefaultExtensions
-        ghcOptions = globalGhcOptions ++ fromMaybeList executableSectionGhcOptions
+        ghcOptions = ghcOptionsForMain ++ globalGhcOptions ++ fromMaybeList executableSectionGhcOptions
 
         filterMain :: [String] -> [String]
-        filterMain = maybe id (filter . (/=)) (toModule $ splitDirectories executableSectionMain)
+        filterMain = maybe id (filter . (/=)) (toModule $ splitDirectories mainSrcFile)
+
+        (mainSrcFile, ghcOptionsForMain) = parseMain executableSectionMain
 
 fromMaybeList :: Maybe (List a) -> [a]
 fromMaybeList = maybe [] fromList

@@ -300,6 +300,17 @@ spec = around_ (inTempDirectoryNamed "foo") $ do
         Right (_, c) <- readPackageConfig "package.yaml"
         packageExecutables c `shouldBe` [executable "foo" "driver/Main.hs"]
 
+      it "accepts arbitrary entry points as main" $ do
+        writeFile "package.yaml" [i|
+          executables:
+            foo:
+              main: Foo
+          |]
+        Right (_, c) <- readPackageConfig "package.yaml"
+        packageExecutables c `shouldBe` [
+            (executable "foo" "Foo.hs") {executableGhcOptions = ["-main-is Foo"]}
+          ]
+
       it "accepts source-dirs" $ do
         writeFile "package.yaml" [i|
           executables:

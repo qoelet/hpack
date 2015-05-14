@@ -18,8 +18,13 @@ source-repository head
   location: https://github.com/sol/hpack
 
 executable hpack
-  hs-source-dirs: driver, src
+  hs-source-dirs: src, driver
   main-is: Main.hs
+  other-modules:
+      Config
+      Haskell
+      Run
+      Util
   build-depends:
       aeson >= 0.8
     , base == 4.*
@@ -35,16 +40,18 @@ executable hpack
 
 test-suite spec
   type: exitcode-stdio-1.0
-  hs-source-dirs: test, src
+  hs-source-dirs: src, test
   main-is: Spec.hs
   other-modules:
+      Config
+      Haskell
+      Run
+      Util
       ConfigSpec
+      HaskellSpec
       Helper
       RunSpec
       UtilSpec
-      Config
-      Run
-      Util
   build-depends:
       aeson >= 0.8
     , base == 4.*
