@@ -18,6 +18,11 @@ dependencies:
   - unordered-containers
   - yaml
 
+library:
+  exposed-modules:
+    - Config
+    - Run
+
 source-dirs: src
 
 executables:

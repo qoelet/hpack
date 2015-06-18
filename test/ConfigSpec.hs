@@ -1,4 +1,6 @@
-{-# LANGUAGE QuasiQuotes, OverloadedLists #-}
+{-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE OverloadedLists #-}
+{-# LANGUAGE OverloadedStrings #-}
 module ConfigSpec (
   main
 , spec
@@ -13,6 +15,10 @@ import           Helper
 import           Data.String.Interpolate
 
 import           Config
+
+-- todo
+-- 1. unit tests for parsing git revision
+-- 2. test for proper warnings/error messages
 
 main :: IO ()
 main = hspec spec
@@ -440,6 +446,22 @@ spec = around_ (inTempDirectoryNamed "foo") $ do
           |]
         Right (_, c) <- readPackageConfig "package.yml"
         c `shouldBe` package {packageTests = [(executable "spec" "test/Spec.hs") {executableDependencies = [["hspec", "QuickCheck"]]}]}
+
+      it "accepts git dependencies" $ do
+        writeFile "package.yml" [i|
+          dependencies:
+            - name: hpack
+              git:
+                url: https://github.com/sol/hpack
+                ref: master
+
+          tests:
+            spec:
+              main: test/Spec.hs
+          |]
+        Right (_, c) <- readPackageConfig "package.yml"
+        let git = GitRevision "https://github.com/sol/hpack" "master"
+        c `shouldBe` package {packageTests = [(executable "spec" "test/Spec.hs") {executableDependencies = [["hpack"{dependencyGit = Just git}]]}]}
 
       context "when both global and section specific dependencies are specified" $ do
         it "combines dependencies" $ do

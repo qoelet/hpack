@@ -3,10 +3,12 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE OverloadedStrings #-}
 module Config (
   readPackageConfig
 , Package(..)
-, Dependency
+, Dependency(..)
+, GitRevision(..)
 , GhcOption
 , Library(..)
 , Executable(..)
@@ -137,7 +139,28 @@ readPackageConfig file = do
         where YamlMark{..} = yamlProblemMark
       _ -> ": " ++ show err
 
-type Dependency = String
+data GitRevision = GitRevision {
+  gitRevisionUrl :: String
+, gitRevisionRef :: String
+} deriving (Eq, Show, Generic, Data, Typeable)
+
+instance FromJSON GitRevision where
+  parseJSON = genericParseJSON_
+
+data Dependency = Dependency {
+  dependencyName :: String
+, dependencyGit :: Maybe GitRevision
+} deriving (Eq, Show, Generic, Data, Typeable)
+
+instance IsString Dependency where
+  fromString name = Dependency name Nothing
+
+instance FromJSON Dependency where
+  parseJSON v = case v of
+    String _ -> fromString <$> parseJSON v
+    Object v -> Dependency <$> v .: "name" <*> v .: "git"
+    _ -> mzero
+
 type GhcOption = String
 
 data Package = Package {

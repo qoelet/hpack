@@ -17,6 +17,26 @@ source-repository head
   type: git
   location: https://github.com/sol/hpack
 
+library
+  hs-source-dirs: src
+  exposed-modules:
+      Config
+      Run
+  other-modules:
+      Util
+  build-depends:
+      aeson >= 0.8
+    , base == 4.*
+    , base-compat >= 0.8
+    , deepseq
+    , directory
+    , filepath
+    , text
+    , unordered-containers
+    , yaml
+  ghc-options: -Wall
+  default-language: Haskell2010
+
 executable hpack
   hs-source-dirs: src, driver
   main-is: Main.hs

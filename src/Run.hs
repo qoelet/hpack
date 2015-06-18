@@ -129,11 +129,11 @@ renderTest executable@Executable{..} =
   ++ renderExecutableSection executable
 
 renderExecutableSection :: Executable -> String
-renderExecutableSection Executable{..} = 
+renderExecutableSection Executable{..} =
      renderSourceDirs executableSourceDirs
   ++ "  main-is: " ++ executableMain ++ "\n"
   ++ renderOtherModules executableOtherModules
-  ++ renderDependencies executableDependencies 
+  ++ renderDependencies executableDependencies
   ++ renderDefaultExtensions executableDefaultExtensions
   ++ renderGhcOptions executableGhcOptions
   ++ "  default-language: Haskell2010\n"
@@ -168,7 +168,7 @@ renderOtherModules modules
 renderDependencies :: [[Dependency]] -> String
 renderDependencies dependencies
   | null dependencies = ""
-  | otherwise = concatMap render $ zip (True : repeat False) dependencies
+  | otherwise = concatMap render $ zip (True : repeat False) (map (map dependencyName) dependencies)
   where
     render (isFirst, xs)
       | isFirst = "  build-depends:\n      " ++ intercalate "\n    , " xs ++ "\n"
